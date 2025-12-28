@@ -1,41 +1,62 @@
 import React, { useRef } from 'react';
-import { products } from '../data/products';
+import { products, getProductBySlug } from '../data/products';
 import { motion, useScroll, useTransform, useSpring, MotionValue } from 'framer-motion';
 import { ArrowUpRight, ArrowDown } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 interface FullCollectionProps {
   onNavigateProduct?: (slug: string) => void;
 }
 
 // Image mapping for Collection Page specific assets
-const COLLECTION_IMAGES: Record<string, { desktop: string; mobile: string }> = {
+// Section Configuration: Backgrounds, Alignment, and Theme
+const SECTION_CONFIG: Record<string, {
+  desktop: string;
+  mobile: string;
+  alignment: 'left' | 'right';
+  theme: 'dark' | 'light';
+}> = {
   'dior-eloise': {
-    desktop: '/selected-dior-eloise.jpeg',
-    mobile: '/m_collectionpage_dior_eloise.png'
+    desktop: '/zizi-webp/eloise.webp',
+    mobile: '/zizi-webp/eloise-mobile.webp',
+    alignment: 'left',
+    theme: 'dark'
   },
   'fendi-vittoria': {
-    desktop: '/selected-fendi-vittoria.jpeg',
-    mobile: '/m.collectionpage.lv-fendi.png'
+    desktop: '/zizi-webp/vittoria.webp',
+    mobile: '/zizi-webp/vittoria-mobile.webp',
+    alignment: 'right',
+    theme: 'light'
   },
   'lv-aurele': {
-    desktop: '/selected-lv-aurele.jpeg',
-    mobile: '/m_collectionpage_lv_aurele.png'
+    desktop: '/zizi-webp/aurele.webp',
+    mobile: '/zizi-webp/aurele-mobile.webp',
+    alignment: 'left',
+    theme: 'dark'
   },
   'lv-benoit': {
-    desktop: '/collectionpage_lv_benoit.png',
-    mobile: '/m_collectionpage_lv_benoit.png'
+    desktop: '/zizi-webp/benoit.webp',
+    mobile: '/zizi-webp/benoit-mobile.webp',
+    alignment: 'right',
+    theme: 'dark'
   },
   'hermes-henrietta': {
-    desktop: '/collectionpage_hermes_henrietta.png',
-    mobile: '/m_collectionpage_hermes_henrietta.png'
+    desktop: '/zizi-webp/henrietta.webp',
+    mobile: '/zizi-webp/henrietta-mobile.webp',
+    alignment: 'right',
+    theme: 'light'
   },
   'harrods-william': {
-    desktop: '/collectionpage_harrods_william.png',
-    mobile: '/m_collectionpage_harrods_william.png'
+    desktop: '/zizi-webp/william.webp',
+    mobile: '/zizi-webp/william-mobile.webp',
+    alignment: 'left',
+    theme: 'light'
   },
   'fortnum-reginald': {
-    desktop: '/collectionpage_fm_reginald.png',
-    mobile: '/m_collectionpage_fm_reginald.png'
+    desktop: '/zizi-webp/reginald.webp',
+    mobile: '/zizi-webp/reginald-mobile.webp',
+    alignment: 'right',
+    theme: 'light' // Lighter background, dark text
   }
 };
 
@@ -50,9 +71,9 @@ const PRODUCT_DESCRIPTIONS: Record<string, string> = {
   'fortnum-reginald': 'London heritage embodied in the crown jewel of the collection.'
 };
 
-// Helper to get correct display image
+// Helper not needed with new config approach, but keeping if other parts use it, otherwise ignoring
 const getDisplayImage = (slug: string, fallbackImages: string[]) => {
-  return COLLECTION_IMAGES[slug]?.desktop || fallbackImages[0];
+  return fallbackImages[0];
 };
 
 // --- CURTAIN COMPONENT ---
@@ -88,11 +109,20 @@ const Curtain: React.FC<CurtainProps> = ({ children, zIndex, progress, range, cl
 
 const FullCollection: React.FC<FullCollectionProps> = ({ onNavigateProduct }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { addToCart } = useCart();
   const { scrollYProgress } = useScroll({ target: containerRef });
   const smoothProgress = useSpring(scrollYProgress, { damping: 20, stiffness: 100 });
 
   const handleNavigate = (slug: string) => {
     if (onNavigateProduct) onNavigateProduct(slug);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent, slug: string) => {
+    e.stopPropagation();
+    const productData = getProductBySlug(slug);
+    if (productData) {
+      addToCart(productData);
+    }
   };
 
   // Total sections = 1 (Hero) + number of products
@@ -113,7 +143,7 @@ const FullCollection: React.FC<FullCollectionProps> = ({ onNavigateProduct }) =>
       <Curtain zIndex={0} progress={smoothProgress} range={[0, step]}>
         <div className="absolute inset-0">
           <img
-            src="/collection_hero_bg_symbolic_turtle_16x9.jpeg"
+            src="/zizi-webp/collection_hero_bg_symbolic_turtle_16x9.webp"
             alt="Genesis Collection"
             className="w-full h-full object-cover opacity-90"
             loading="eager"
@@ -150,8 +180,12 @@ const FullCollection: React.FC<FullCollectionProps> = ({ onNavigateProduct }) =>
       {products.map((product, index) => {
         const panelIndex = index + 1; // Offset by 1 because Hero is first
         const range: [number, number] = [panelIndex * step, (panelIndex + 1) * step];
-        const displayImage = getDisplayImage(product.slug, product.images);
+        // const displayImage = getDisplayImage(product.slug, product.images); // No longer needed
         const description = PRODUCT_DESCRIPTIONS[product.slug] || 'A masterpiece of craftsmanship.';
+        const config = SECTION_CONFIG[product.slug];
+        const isRightAligned = config?.alignment === 'right'; // Default to left if undefined
+        const isLightMode = config?.theme === 'light';
+        const textColorClass = isLightMode ? 'text-black' : 'text-white';
 
         return (
           <Curtain
@@ -159,60 +193,75 @@ const FullCollection: React.FC<FullCollectionProps> = ({ onNavigateProduct }) =>
             zIndex={panelIndex}
             progress={smoothProgress}
             range={range}
-            className={index % 2 === 0 ? 'bg-[#0a0a0a]' : 'bg-white'}
+            className="bg-black"
           >
-            {/* Split-Screen Layout */}
-            <div className="w-full h-full flex flex-col md:flex-row">
+            {/* Background Images - No Overlay */}
+            <div className="absolute inset-0 z-0 overflow-hidden group">
+              {config && (
+                <>
+                  <motion.img
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 4, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+                    src={config.desktop}
+                    alt={`${product.title} Background`}
+                    className="hidden md:block w-full h-full object-cover origin-center"
+                  />
+                  <motion.img
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 4, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+                    src={config.mobile}
+                    alt={`${product.title} Background`}
+                    className="block md:hidden w-full h-full object-cover object-top origin-top"
+                  />
+                </>
+              )}
+            </div>
 
-              {/* LEFT SIDE: Text & Buttons */}
-              <div className="flex-1 flex flex-col justify-end md:justify-center p-8 md:p-16 lg:p-24 order-2 md:order-1">
+            {/* Content Layout */}
+            <div className={`relative z-10 w-full h-full flex flex-col md:flex-row p-8 md:p-16 lg:p-24 ${isRightAligned ? 'md:justify-end' : 'md:justify-start'} justify-start`}>
+
+              {/* Text Container */}
+              <div className="md:w-1/3 flex flex-col justify-start md:justify-center mt-12 md:mt-0">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="max-w-lg"
                 >
-                  <h2 className={`text-5xl md:text-7xl lg:text-8xl font-serif mb-4 leading-[0.9] ${index % 2 === 0 ? 'text-white' : 'text-black'}`}>
+                  <h2 className={`text-5xl md:text-7xl lg:text-8xl font-serif mb-4 leading-[0.9] ${textColorClass}`}>
                     {product.title}
                   </h2>
 
-                  <p className={`text-2xl md:text-3xl font-serif italic mb-6 ${index % 2 === 0 ? 'text-white/80' : 'text-black/70'}`}>
+                  <p className={`text-2xl md:text-3xl font-serif italic mb-6 ${textColorClass} opacity-80`}>
                     {product.price}
                   </p>
 
-                  <p className={`text-sm md:text-base font-sans leading-relaxed mb-10 max-w-md ${index % 2 === 0 ? 'text-white/50' : 'text-black/50'}`}>
+                  <p className={`text-sm md:text-base font-sans leading-relaxed mb-8 max-w-md ${textColorClass} opacity-70`}>
                     {description}
                   </p>
 
+                  <button
+                    onClick={() => handleNavigate(product.slug)}
+                    className={`block w-fit mb-8 text-[10px] font-bold uppercase tracking-[0.2em] border-b pb-1 transition-all ${isLightMode ? 'border-black/30 hover:border-black text-black' : 'border-white/30 hover:border-white text-white'}`}
+                  >
+                    More Details
+                  </button>
+
                   <div className="flex flex-wrap items-center gap-6">
                     <button
-                      onClick={(e) => { e.stopPropagation(); alert(`Added ${product.title} to Cart`); }}
-                      className={`px-8 py-3 text-xs font-bold tracking-[0.15em] uppercase transition-colors rounded-full shadow-lg ${index % 2 === 0 ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
+                      onClick={(e) => handleAddToCart(e, product.slug)}
+                      className={`px-8 py-3 text-xs font-bold tracking-[0.15em] uppercase transition-colors rounded-full shadow-lg ${isLightMode ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'}`}
                     >
                       Add to Cart
                     </button>
                     <button
                       onClick={() => handleNavigate(product.slug)}
-                      className={`transition-colors uppercase text-xs font-bold tracking-[0.15em] flex items-center gap-2 ${index % 2 === 0 ? 'text-white/60 hover:text-white' : 'text-black/60 hover:text-black'}`}
+                      className={`transition-colors uppercase text-xs font-bold tracking-[0.15em] flex items-center gap-2 ${textColorClass} hover:opacity-100 opacity-60`}
                     >
                       Buy Now <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
                 </motion.div>
-              </div>
-
-              {/* RIGHT SIDE: Image */}
-              <div
-                className="flex-1 relative cursor-pointer order-1 md:order-2 min-h-[50vh] md:min-h-0"
-                onClick={() => handleNavigate(product.slug)}
-              >
-                <img
-                  src={displayImage}
-                  alt={product.title}
-                  className="absolute inset-0 w-full h-full object-cover object-center"
-                  loading="lazy"
-                />
-                <div className="hidden md:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0a0a] to-transparent" />
               </div>
 
             </div>

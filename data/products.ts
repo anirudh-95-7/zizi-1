@@ -40,11 +40,11 @@ export const products: Product[] = [
       <p>As a collectible object, Éloise commands space with quiet confidence. It is designed to be curated within a refined interior, serving as a focal point on a mantle, a study in texture on a console, or an anchor in a minimalist shelving arrangement. Each piece undergoes a rigorous inspection to ensure the flawless integration of its material components.</p>
     `,
         images: [
-            '/dior-eloise-hero.jpeg',
-            '/dior-eloise.jpg',
-            '/dior-eloise2.jpg',
-            '/selected-dior-eloise.jpeg',
-            '/collector-dior-eloise.jpeg'
+            '/zizi-webp/dior-eloise-hero.webp',
+            '/zizi-webp/dior-eloise.webp',
+            '/zizi-webp/dior-eloise2.webp',
+            '/zizi-webp/selected-dior-eloise.webp',
+            '/zizi-webp/collector-dior-eloise.webp'
         ],
         specs: {
             material: 'Fine Porcelain, 18k Gold-Plated Alloy',
@@ -74,11 +74,11 @@ export const products: Product[] = [
       <p>The ceramic shell is kiln-fired to achieve a glass-like hardness, providing a perfect canvas for the intricate decal work. The metallic elements are polished to a mirror shine, reflecting the environment and grounding the piece with a sense of substantial luxury.</p>
     `,
         images: [
-            '/fendi-vittoria.jpg',
-            '/fendi-vittoria(1).jpg',
-            '/fendi.jpg',
-            '/selected-fendi-vittoria.jpeg',
-            '/collector-fendi-vittoria.jpeg'
+            '/zizi-webp/fendi-vittoria.webp',
+            '/zizi-webp/fendi-vittoria(1).webp',
+            '/zizi-webp/fendi.webp',
+            '/zizi-webp/selected-fendi-vittoria.webp',
+            '/zizi-webp/collector-fendi-vittoria.webp'
         ],
         specs: {
             material: 'High-Gloss Ceramic & Polished Brass Finish',
@@ -108,11 +108,11 @@ export const products: Product[] = [
       <p>This sculpture is not merely a decorative item; it is a trophy of style. It pairs exceptionally well with dark woods, marble, and velvet textures, bringing a warm, metallic glow to refined interiors. A true collector's item that transcends trends.</p>
     `,
         images: [
-            '/lv-aurele.jpg',
-            '/lv-aurele(1).jpg',
-            '/lv-aurele-2.jpg',
-            '/selected-lv-aurele.jpeg',
-            '/collector-lv-aurele.jpeg'
+            '/zizi-webp/lv-aurele.webp',
+            '/zizi-webp/lv-aurele(1).webp',
+            '/zizi-webp/lv-aurele-2.webp',
+            '/zizi-webp/selected-lv-aurele.webp',
+            '/zizi-webp/collector-lv-aurele.webp'
         ],
         specs: {
             material: 'Electroplated Art Resin Core',
@@ -142,9 +142,9 @@ export const products: Product[] = [
       <p>The bronze finish is achieved through a multi-step plating process that ensures durability and depth of color. Over time, the piece maintains its rich hue, devoid of the patina of raw metal but possessing all of its visual character.</p>
     `,
         images: [
-            '/lv-benoit.jpg',
-            '/lv-benoit-2.jpg',
-            '/lv-benoit-2(1).jpg'
+            '/zizi-webp/lv-benoit.webp',
+            '/zizi-webp/lv-benoit-2.webp',
+            '/zizi-webp/lv-benoit-2(1).webp'
         ],
         specs: {
             material: 'Heavyweight Resin Composite',
@@ -174,9 +174,9 @@ export const products: Product[] = [
       <p>The craftsmanship focuses on the vibrancy of the ceramic glaze, ensuring the orange hue remains color-true and luminous. The combination of the playful pattern and the serious, sculptural form captures the wit and whimsy at the heart of the ZIZI brand.</p>
     `,
         images: [
-            '/hermes-henrietta.jpg',
-            '/hermes-henrietta(1).jpg',
-            '/hermes-henrietta-2.jpg'
+            '/zizi-webp/hermes-henrietta.webp',
+            '/zizi-webp/hermes-henrietta(1).webp',
+            '/zizi-webp/hermes-henrietta-2.webp'
         ],
         specs: {
             material: 'Glazed Ceramic & Gold Plate',
@@ -206,9 +206,9 @@ export const products: Product[] = [
       <p>The "William" edition is a nod to timeless style. The green glaze is applied thick for a depth that looks almost liquid, while the gold legs provide a sturdy, bright foundation that lifts the piece, giving it a sense of movement.</p>
     `,
         images: [
-            '/harrods-william.jpg',
-            '/harrods-william-2.jpg',
-            '/harrods-william-2(1).jpg'
+            '/zizi-webp/harrods-william.webp',
+            '/zizi-webp/harrods-william-2.webp',
+            '/zizi-webp/harrods-william-2(1).webp'
         ],
         specs: {
             material: 'Ceramic & Metal Alloy',
@@ -238,11 +238,11 @@ export const products: Product[] = [
       <p>Reginald is about subtle luxury. The finish is smooth and creamy, inviting touch. It is a piece that feels like a confection—delightful, sweet, and expertly made.</p>
     `,
         images: [
-            '/fm-reginald.jpg',
-            '/fm-reginald(1).jpg',
-            '/fm-reginald-2.jpg',
-            '/fm-reginald-2(1).jpg',
-            '/fm-reginald-2(2).jpg'
+            '/zizi-webp/fm-reginald.webp',
+            '/zizi-webp/fm-reginald(1).webp',
+            '/zizi-webp/fm-reginald-2.webp',
+            '/zizi-webp/fm-reginald-2(1).webp',
+            '/zizi-webp/fm-reginald-2(2).webp'
         ],
         specs: {
             material: 'Fine Porcelain & Gold Plate',

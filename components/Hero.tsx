@@ -12,45 +12,50 @@ const Hero: React.FC<HeroProps> = ({ onNavigateProduct }) => {
   };
 
   return (
-    <section className="relative w-full h-full bg-white overflow-hidden">
-      {/* Background Image - Dior Éloise Hero with uniform blur */}
+    <section className="relative w-full h-[100dvh] bg-black overflow-hidden">
+      {/* Background Image - Immersive Experience */}
       <div className="absolute inset-0 z-0">
-        <img
-          src="/dior-eloise-hero.jpeg"
-          alt="Dior – Éloise"
-          className="w-full h-full object-cover object-center blur-[2px]"
-        />
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
-        {/* Subtle vignette to focus on center content */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 30%, rgba(0,0,0,0.2) 100%)'
-          }}
-        />
+        <picture>
+          <source srcSet="/zizi-webp/eloise-mobile.webp" media="(max-width: 768px)" />
+          <img
+            src="/zizi-webp/dior-eloise-hero.webp"
+            alt="Dior – Éloise"
+            className="w-full h-full object-cover object-center scale-105 animate-slow-zoom blur-[1px]"
+          />
+        </picture>
+
+        {/* Cinematic Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+        <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* Hero Content - Absolutely positioned at bottom, below the ZIZI wordmark */}
-      <div className="absolute bottom-12 md:bottom-16 left-0 right-0 z-20 text-center px-6">
-        <div className="max-w-xl mx-auto animate-fade-in">
-          {/* Subtitle with product info */}
-          <div className="mb-8">
-            <p className="text-white text-xs md:text-sm font-sans tracking-[0.2em] uppercase font-semibold">
-              Dior – Éloise <span className="mx-2 text-white/40">|</span> Toile de Jouy — Signature Blue
-            </p>
+      {/* Hero Content - Award Winning Placement */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-24 md:pb-32 px-6">
+        <div className="max-w-2xl mx-auto text-center space-y-8 animate-fade-in-up">
+          {/* Metadata */}
+          <div className="space-y-2">
+            <span className="text-white/60 text-[10px] tracking-[0.5em] uppercase font-bold">The Archive</span>
+            <h2 className="text-white text-lg md:text-2xl font-serif italic tracking-wide">
+              Dior – Éloise
+            </h2>
           </div>
 
-          {/* CTA Button - Explore Piece */}
+          {/* CTA */}
           <button
             onClick={handleExplore}
-            className="group relative inline-flex items-center justify-center px-10 py-3.5 overflow-hidden border border-white/30 bg-white/10 backdrop-blur-md rounded-full transition-all duration-500 hover:bg-white hover:border-white"
+            className="group relative inline-flex items-center justify-center px-12 py-4 overflow-hidden rounded-full transition-all duration-700 active:scale-95"
           >
-            <span className="relative text-[10px] font-bold tracking-[0.3em] uppercase text-white transition-colors duration-500 group-hover:text-black">
-              Explore Piece
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full transition-all duration-500 group-hover:bg-white group-hover:border-white" />
+            <span className="relative text-[10px] font-bold tracking-[0.4em] uppercase text-white transition-colors duration-500 group-hover:text-black">
+              View Composition
             </span>
           </button>
         </div>
+      </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 opacity-40">
+        <div className="w-[1px] h-12 bg-gradient-to-b from-white/0 via-white to-white/0 animate-scroll-line" />
       </div>
     </section>
   );

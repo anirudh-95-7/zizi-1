@@ -3,14 +3,18 @@ import { ArrowLeft, ArrowDown, ArrowUpRight } from 'lucide-react';
 import { Product } from '../data/products';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import SmoothScroll from './SmoothScroll';
+import { useCart } from '../context/CartContext';
 
 interface ProductDetailPageProps {
     product: Product;
     onBack: () => void;
-    onNavigate: (view: 'home' | 'collection' | 'inspiration' | 'about') => void;
+    onNavigate: (view: 'home' | 'collection' | 'inspiration' | 'about' | 'cart') => void;
 }
 
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, onNavigate }) => {
+    // Cart Context
+    const { addToCart } = useCart();
+
     // Parallax & Scroll Hooks
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({ target: containerRef });
@@ -26,6 +30,11 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, 
     // Story Layer (Z-10) - Slides Up, then fades slightly as Gallery covers it
     const storyScale = useTransform(smoothProgress, [0.2, 0.5], [1, 0.95]);
     const storyOpacity = useTransform(smoothProgress, [0.3, 0.5], [1, 0]);
+
+    const handleAddToCart = () => {
+        addToCart(product);
+        onNavigate('cart');
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -53,7 +62,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, 
                 {/* This stays fixed at the top while other layers scroll over it */}
                 <motion.section
                     style={{ scale: heroScale, opacity: heroOpacity }}
-                    className="sticky top-0 h-screen w-full z-0 overflow-hidden flex flex-col items-center justify-center bg-black"
+                    className="sticky top-0 h-screen w-full z-0 overflow-hidden flex flex-col items-center justify-end md:justify-center pb-32 md:pb-0 bg-black"
                 >
                     <img
                         src={product.images[0]}
@@ -61,14 +70,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, 
                         className="absolute inset-0 w-full h-full object-cover opacity-80"
                         loading="eager"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
                     <div className="relative z-10 text-center max-w-6xl px-6">
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8 }}
-                            className="text-xs md:text-sm font-bold tracking-[0.4em] uppercase mb-8 text-white/70"
+                            className="text-[10px] md:text-sm font-bold tracking-[0.4em] uppercase mb-4 md:mb-8 text-white/70"
                         >
                             Masterpiece Collection
                         </motion.p>
@@ -76,7 +85,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, 
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 1, delay: 0.2 }}
-                            className="text-[12vw] leading-[0.85] font-serif font-medium tracking-tighter text-white mix-blend-overlay"
+                            className="text-[14vw] md:text-[12vw] leading-[0.85] font-serif font-medium tracking-tighter text-white mix-blend-overlay"
                         >
                             {product.title}
                         </motion.h1>
@@ -86,7 +95,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1, duration: 1 }}
-                        className="absolute bottom-12 w-full flex justify-center"
+                        className="absolute bottom-8 md:bottom-12 w-full flex justify-center"
                     >
                         <ArrowDown className="text-white/50 animate-bounce" size={24} />
                     </motion.div>
@@ -96,36 +105,39 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack, 
                 {/* Visual: Paper-like sheet sliding up */}
                 <motion.section
                     style={{ scale: storyScale, opacity: storyOpacity }}
-                    className="sticky top-0 h-screen w-full z-10 flex items-center justify-center bg-[#fbfaf8] text-black shadow-[0_-50px_100px_rgba(0,0,0,0.5)] rounded-t-[3rem] overflow-hidden"
+                    className="relative md:sticky md:top-0 min-h-screen w-full z-10 flex items-center justify-center bg-[#fbfaf8] text-black shadow-[0_-50px_100px_rgba(0,0,0,0.5)] rounded-t-[2rem] md:rounded-t-[3rem] overflow-hidden py-12 md:py-0"
                 >
-                    <div className="max-w-[1400px] w-full px-6 md:px-24 grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 items-center h-full">
+                    <div className="max-w-[1400px] w-full px-6 md:px-24 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-32 items-center h-full">
 
                         {/* Editorial Text */}
                         <div className="flex flex-col justify-center">
-                            <h2 className="text-6xl md:text-8xl font-serif mb-12 leading-[0.9]">The Story</h2>
-                            <div className="w-24 h-[1px] bg-black mb-12" />
+                            <h2 className="text-5xl md:text-8xl font-serif mb-8 md:mb-12 leading-[0.9] mt-8 md:mt-0">The Story</h2>
+                            <div className="w-16 md:w-24 h-[1px] bg-black mb-8 md:mb-12" />
                             <div
-                                className="prose prose-xl prose-p:font-serif prose-p:text-gray-600 prose-p:leading-relaxed"
+                                className="prose prose-lg md:prose-xl prose-p:font-serif prose-p:text-gray-600 prose-p:leading-relaxed"
                                 dangerouslySetInnerHTML={{ __html: product.description }}
                             />
                         </div>
 
                         {/* Commerce / Actions */}
-                        <div className="flex flex-col gap-8 bg-white p-12 shadow-xl rounded-sm">
-                            <div className="flex justify-between items-baseline border-b border-black/10 pb-8">
-                                <span className="text-sm font-bold tracking-widest uppercase text-gray-400">Acquisition</span>
-                                <span className="text-4xl font-serif">{product.price}</span>
+                        <div className="flex flex-col gap-6 md:gap-8 bg-white p-6 md:p-12 shadow-xl rounded-sm mb-12 md:mb-0">
+                            <div className="flex justify-between items-baseline border-b border-black/10 pb-6 md:pb-8">
+                                <span className="text-xs md:text-sm font-bold tracking-widest uppercase text-gray-400">Acquisition</span>
+                                <span className="text-3xl md:text-4xl font-serif">{product.price}</span>
                             </div>
 
-                            <div className="flex gap-4">
-                                <button className="flex-1 bg-black text-white py-6 text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-900 transition-colors">
+                            <div className="flex flex-col md:flex-row gap-4">
+                                <button
+                                    onClick={handleAddToCart}
+                                    className="flex-1 bg-black text-white py-5 md:py-6 text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-900 transition-colors w-full"
+                                >
                                     Add to Collection
                                 </button>
-                                <button className="flex-1 border border-black py-6 text-xs font-bold tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-colors">
+                                <button className="flex-1 border border-black py-5 md:py-6 text-xs font-bold tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-colors w-full">
                                     Inquire
                                 </button>
                             </div>
-                            <p className="text-[10px] text-gray-400 text-center uppercase tracking-widest mt-4">
+                            <p className="text-[10px] text-gray-400 text-center uppercase tracking-widest mt-2 md:mt-4">
                                 Worldwide Shipping • Authenticity Certified
                             </p>
                         </div>

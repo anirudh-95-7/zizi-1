@@ -10,17 +10,17 @@ const testimonials: Testimonial[] = [
   {
     quote: "Absolutely love my ZIZI piece. It's the kind of detail that makes the whole room feel special.",
     author: "Emily Harper",
-    image: "/collector-dior-eloise.jpeg"
+    image: "/zizi-webp/collector-dior-eloise.webp"
   },
   {
     quote: "We weren't expecting something this unique. It's become a conversation starter.",
     author: "The Marshalls",
-    image: "/collector-fendi-vittoria.jpeg"
+    image: "/zizi-webp/collector-fendi-vittoria.webp"
   },
   {
     quote: "Clean, bold, and beautifully made. Feels like something from a gallery.",
     author: "Daniel Reid",
-    image: "/collector-lv-aurele.jpeg"
+    image: "/zizi-webp/collector-lv-aurele.webp"
   }
 ];
 
@@ -32,14 +32,14 @@ const Testimonials: React.FC = () => {
           Collector Notes
         </h2>
 
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-center min-h-0">
+        <div className="flex-1 flex md:grid md:grid-cols-3 gap-8 md:gap-12 items-center overflow-x-auto md:overflow-visible scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 min-h-0 snap-x snap-mandatory">
           {testimonials.map((item, index) => (
             <div
               key={index}
-              className="flex flex-col h-full justify-center group"
+              className="flex-shrink-0 w-[80vw] md:w-auto flex flex-col h-full justify-center group snap-center"
             >
               {/* Supporting image - increased height and centered crop */}
-              <div className="mb-6 overflow-hidden rounded-sm flex-shrink-0">
+              <div className="mb-6 overflow-hidden rounded-sm flex-shrink-0 aspect-video md:aspect-auto">
                 <img
                   src={item.image}
                   alt="ZIZI sculpture in home interior"

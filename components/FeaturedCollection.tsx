@@ -1,5 +1,7 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { getProductBySlug } from '../data/products';
 
 const products = [
   {
@@ -7,7 +9,7 @@ const products = [
     title: "Dior – Éloise",
     category: "Featured Sculpture",
     price: "£575",
-    image: "/selected-dior-eloise.jpeg",
+    image: "/zizi-webp/selected-dior-eloise.webp",
     slug: "dior-eloise"
   },
   {
@@ -15,7 +17,7 @@ const products = [
     title: "Fendi – Vittoria",
     category: "Featured Sculpture",
     price: "£575",
-    image: "/selected-fendi-vittoria.jpeg",
+    image: "/zizi-webp/selected-fendi-vittoria.webp",
     slug: "fendi-vittoria"
   },
   {
@@ -23,7 +25,7 @@ const products = [
     title: "Louis Vuitton – Aurèle",
     category: "Featured Sculpture",
     price: "£575",
-    image: "/selected-lv-aurele.jpeg",
+    image: "/zizi-webp/selected-lv-aurele.webp",
     slug: "lv-aurele-gold"
   }
 ];
@@ -33,6 +35,16 @@ interface FeaturedCollectionProps {
 }
 
 const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ onNavigateProduct }) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent, slug: string) => {
+    e.stopPropagation();
+    const productData = getProductBySlug(slug);
+    if (productData) {
+      addToCart(productData);
+    }
+  };
+
   return (
     <section className="h-full w-full bg-[#f4f4f4] relative overflow-hidden flex flex-col justify-center">
 
@@ -46,7 +58,7 @@ const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ onNavigateProdu
       <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col h-[85vh] justify-center">
 
         {/* Header */}
-        <div className="flex justify-between items-end mb-16 border-b border-black/5 pb-6">
+        <div className="flex justify-between items-end mb-8 md:mb-16 border-b border-black/5 pb-6">
           <div className="flex flex-col">
             <span className="text-xs font-bold tracking-[0.3em] uppercase text-gray-400 mb-2">Curated Selection</span>
             <h2 className="text-4xl md:text-5xl font-serif text-black">Spring 2025</h2>
@@ -56,13 +68,13 @@ const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ onNavigateProdu
           </button>
         </div>
 
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 h-[60vh]">
+        {/* Gallery Grid / Mobile Scroller */}
+        <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 h-auto md:h-[60vh] pb-8 md:pb-0 snap-x snap-mandatory">
           {products.map((product) => (
             <div
               key={product.id}
               onClick={() => onNavigateProduct(product.slug)}
-              className="group relative cursor-pointer w-full h-full overflow-hidden bg-gray-200"
+              className="flex-shrink-0 w-[85vw] md:w-auto md:flex-1 aspect-[3/4] md:aspect-auto md:h-full relative cursor-pointer overflow-hidden bg-gray-200 snap-center group"
             >
               {/* Image Layer */}
               <div className="absolute inset-0 w-full h-full overflow-hidden">
@@ -95,11 +107,17 @@ const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ onNavigateProdu
 
                     {/* Soft Tactile Buttons */}
                     <div className="flex gap-2 mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-300">
-                      <button className="flex-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest py-3 hover:bg-gray-800 transition-colors">
+                      <button
+                        onClick={(e) => handleAddToCart(e, product.slug)}
+                        className="flex-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest py-3 hover:bg-gray-800 transition-colors"
+                      >
                         Add
                       </button>
-                      <button className="flex-1 border border-black text-black text-[10px] font-bold uppercase tracking-widest py-3 hover:bg-black hover:text-white transition-colors">
-                        Purchase
+                      <button
+                        onClick={() => onNavigateProduct(product.slug)}
+                        className="flex-1 border border-black text-black text-[10px] font-bold uppercase tracking-widest py-3 hover:bg-black hover:text-white transition-colors"
+                      >
+                        Details
                       </button>
                     </div>
                   </div>

@@ -8,12 +8,15 @@ import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import InstagramArchive from './components/InstagramArchive';
 import { getProductBySlug } from './data/products';
+import { CartProvider } from './context/CartContext';
+import SmoothScroll from './components/SmoothScroll';
 
 // Lazy-loaded heavy components for code splitting
 const FullCollection = lazy(() => import('./components/FullCollection'));
 const Inspiration = lazy(() => import('./components/Inspiration'));
 const AboutPage = lazy(() => import('./components/AboutPage'));
 const ProductDetailPage = lazy(() => import('./components/ProductDetailPage'));
+const CartPage = lazy(() => import('./components/CartPage'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -26,25 +29,33 @@ const PageLoader = () => (
 );
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'collection' | 'inspiration' | 'about' | 'product'>('home');
-  const [activeSection, setActiveSection] = useState('The Beginning');
+  const [currentView, setCurrentView] = useState<'home' | 'collection' | 'inspiration' | 'about' | 'product' | 'cart'>('home');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [scrollProgress, setScrollProgress] = useState(0);
   const [currentProductSlug, setCurrentProductSlug] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Track scroll for logo animation
   useEffect(() => {
     const handleScroll = () => {
-      // Normalize scroll for the first viewport height
-      const progress = Math.min(window.scrollY / (window.innerHeight * 0.4), 1);
+      // slower docking on mobile for better experience
+      const threshold = isMobile ? window.innerHeight * 0.6 : window.innerHeight * 0.4;
+      const progress = Math.min(window.scrollY / threshold, 1);
       setScrollProgress(progress);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobile]);
 
-  // Handle URL routing on initial load and popstate
+  // Handle URL routing
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
@@ -57,17 +68,10 @@ export default function App() {
           return;
         }
       }
-
-      // Explicit routing
-      if (path === '/collection') {
-        setCurrentView('collection');
-        return;
-      }
-
-      // Default routing equivalent
+      if (path === '/collection') { setCurrentView('collection'); return; }
+      if (path === '/cart') { setCurrentView('cart'); return; }
       if (path === '/') setCurrentView('home');
     };
-
     handleLocationChange();
     window.addEventListener('popstate', handleLocationChange);
     return () => window.removeEventListener('popstate', handleLocationChange);
@@ -75,8 +79,7 @@ export default function App() {
 
   // Section and Theme Detection
   useEffect(() => {
-    // Force light theme for these views
-    if (['collection', 'about', 'product'].includes(currentView)) {
+    if (['collection', 'about', 'product', 'cart'].includes(currentView)) {
       setTheme('light');
       return;
     }
@@ -90,26 +93,21 @@ export default function App() {
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const sectionName = entry.target.getAttribute('data-section-name');
           const sectionTheme = entry.target.getAttribute('data-theme') as 'dark' | 'light';
-
-          if (sectionName) setActiveSection(sectionName);
           if (sectionTheme) setTheme(sectionTheme);
         }
       });
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
-    setTimeout(() => {
-      const sections = document.querySelectorAll('[data-section-name]');
-      sections.forEach((section) => observer.observe(section));
-    }, 100);
+    const sections = document.querySelectorAll('[data-section-name]');
+    sections.forEach((section) => observer.observe(section));
 
     return () => observer.disconnect();
   }, [currentView]);
 
-  const navigateTo = (view: 'home' | 'collection' | 'inspiration' | 'about') => {
-    window.history.pushState({}, '', view === 'home' ? '/' : `/${view}`); // Simple URL update
+  const navigateTo = (view: 'home' | 'collection' | 'inspiration' | 'about' | 'cart') => {
+    window.history.pushState({}, '', view === 'home' ? '/' : `/${view}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentView(view);
   };
@@ -121,87 +119,111 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
-  // Logo Docking Logic
   const isDocked = scrollProgress === 1 || currentView !== 'home';
-  // Logo always visible except on product detail page
-  const logoOpacity = 1;
-
-  // Get current product data if in product view
   const currentProduct = currentProductSlug ? getProductBySlug(currentProductSlug) : null;
+  const [dockedScale, setDockedScale] = useState(0.12);
+
+  useEffect(() => {
+    const calculateScale = () => {
+      const width = window.innerWidth;
+      const baseSize = width * 0.16;
+      const targetSize = width < 768 ? 28 : 40; // Smaller target on mobile
+      const scale = Math.min(Math.max(targetSize / baseSize, 0.08), 1);
+      setDockedScale(scale);
+    };
+    calculateScale();
+    window.addEventListener('resize', calculateScale);
+    return () => window.removeEventListener('resize', calculateScale);
+  }, []);
+
+  // Color logic for logo
+  const getLogoColor = () => {
+    if (currentView !== 'home') return 'black';
+    if (scrollProgress < 0.2) return 'white'; // Keep white longer
+    return theme === 'dark' ? 'white' : 'black';
+  };
+
+  // Calculate Y movement for docking
+  const getLogoTransform = () => {
+    const headerOffset = isMobile ? '2.4rem' : '2.2rem';
+    if (isDocked) return `translateY(calc(-50vh + ${headerOffset})) scale(${dockedScale})`;
+
+    const yMove = `calc(-${scrollProgress * 50}vh + ${scrollProgress * parseFloat(headerOffset)}rem)`;
+    const scaleVal = 1 - (scrollProgress * (1 - dockedScale));
+    return `translateY(${yMove}) scale(${scaleVal})`;
+  };
 
   return (
-    <div className="relative bg-white font-sans selection:bg-gray-300 selection:text-black min-h-screen">
-      <Navbar theme={theme} onNavigate={navigateTo} currentView={currentView} isLogoDocked={isDocked} />
+    <CartProvider>
+      <SmoothScroll>
+        <div className="grain relative bg-white font-sans selection:bg-black selection:text-white min-h-screen">
+          <Navbar theme={theme} onNavigate={navigateTo} currentView={currentView} isLogoDocked={isDocked} />
 
-      {/* --- DYNAMIC MONOLITHIC LOGO --- */}
-      {/* Animates from center (homepage) to docked position. Visible on ALL pages. */}
-      <div
-        className="fixed inset-0 z-[145] flex items-center justify-center pointer-events-none"
-      >
-        <h1
-          onClick={() => navigateTo('home')}
-          className="font-serif font-bold tracking-tighter leading-none cursor-pointer pointer-events-auto"
-          style={{
-            transform: isDocked
-              ? `translateY(calc(-50vh + 2.2rem)) scale(0.12)`
-              : `translateY(calc(-${scrollProgress * 50}vh + ${scrollProgress * 2.2}rem)) scale(${1 - (scrollProgress * 0.88)})`,
-            fontSize: '16vw',
-            // Homepage at top: white. Everything else: black.
-            color: (currentView === 'home' && scrollProgress < 0.15) ? 'white' : 'black',
-            transition: 'transform 0.4s ease-out, color 0.3s ease-out',
-            textShadow: (currentView === 'home' && scrollProgress < 0.5) ? '0 4px 30px rgba(0,0,0,0.5)' : 'none',
-          }}
-        >
-          ZIZI
-        </h1>
-      </div>
+          {/* --- DYNAMIC MONOLITHIC LOGO --- */}
+          <div className="fixed inset-0 z-[170] flex items-center justify-center pointer-events-none">
+            <h1
+              onClick={() => navigateTo('home')}
+              className="font-serif font-bold tracking-tighter leading-none cursor-pointer pointer-events-auto select-none"
+              style={{
+                transform: getLogoTransform(),
+                fontSize: '16vw',
+                color: getLogoColor(),
+                transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease',
+                textShadow: (currentView === 'home' && scrollProgress < 0.5) ? '0 4px 30px rgba(0,0,0,0.3)' : 'none',
+              }}
+            >
+              ZIZI
+            </h1>
+          </div>
 
-      {/* --- VIEW ROUTING --- */}
-      {currentView === 'home' ? (
-        <>
-          <div className="sticky top-0 z-10 h-screen w-full overflow-hidden" data-section-name="The Beginning" data-theme="dark">
-            <Hero onNavigateProduct={navigateToProduct} />
-          </div>
-          <div className="sticky top-0 z-20 h-screen w-full overflow-hidden bg-white" data-section-name="Spring Collection" data-theme="light">
-            <FeaturedCollection onNavigateProduct={navigateToProduct} />
-          </div>
-          <div className="sticky top-0 z-30 h-screen w-full overflow-hidden bg-[#f4f4f4]" data-section-name="Our Philosophy" data-theme="light">
-            <AboutSection />
-          </div>
-          <div className="sticky top-0 z-40 h-screen w-full overflow-hidden bg-cream" data-section-name="Voices" data-theme="light">
-            <Testimonials />
-          </div>
-          <div className="sticky top-0 z-[45] h-screen w-full overflow-hidden bg-[#f4f4f4]" data-section-name="Archive" data-theme="light">
-            <InstagramArchive />
-          </div>
-          <div className="sticky top-0 z-50 h-screen w-full overflow-hidden bg-black" data-section-name="Join Us" data-theme="dark">
-            <Newsletter />
-          </div>
-          <div className="sticky top-0 z-[60] h-screen w-full overflow-hidden bg-[#050505]" data-section-name="Connect" data-theme="dark">
-            <Footer />
-          </div>
-        </>
-      ) : currentView === 'inspiration' ? (
-        <Suspense fallback={<PageLoader />}>
-          <Inspiration />
-        </Suspense>
-      ) : currentView === 'about' ? (
-        <Suspense fallback={<PageLoader />}>
-          <AboutPage />
-        </Suspense>
-      ) : currentView === 'product' && currentProduct ? (
-        <Suspense fallback={<PageLoader />}>
-          <ProductDetailPage
-            product={currentProduct}
-            onBack={() => navigateTo('home')}
-            onNavigate={navigateTo}
-          />
-        </Suspense>
-      ) : (
-        <Suspense fallback={<PageLoader />}>
-          <FullCollection onNavigateProduct={navigateToProduct} />
-        </Suspense>
-      )}
-    </div>
+          {/* --- VIEW ROUTING --- */}
+          {currentView === 'home' ? (
+            <main className="relative">
+              <div className="sticky top-0 z-10 h-[100dvh] w-full overflow-hidden" data-section-name="The Beginning" data-theme="dark">
+                <Hero onNavigateProduct={navigateToProduct} />
+              </div>
+              <div className="sticky top-0 z-20 h-[100dvh] w-full overflow-hidden bg-white" data-section-name="Spring Collection" data-theme="light">
+                <FeaturedCollection onNavigateProduct={navigateToProduct} />
+              </div>
+              <div className="sticky top-0 z-30 h-[100dvh] w-full overflow-hidden bg-[#f4f4f4]" data-section-name="Our Philosophy" data-theme="light">
+                <AboutSection />
+              </div>
+              <div className="sticky top-0 z-40 h-[100dvh] w-full overflow-hidden bg-[#fbfaf8]" data-section-name="Voices" data-theme="light">
+                <Testimonials />
+              </div>
+              <div className="sticky top-0 z-[45] h-[100dvh] w-full overflow-hidden bg-[#f4f4f4]" data-section-name="Archive" data-theme="light">
+                <InstagramArchive />
+              </div>
+              <div className="sticky top-0 z-50 h-[100dvh] w-full overflow-hidden bg-black" data-section-name="Join Us" data-theme="dark">
+                <Newsletter />
+              </div>
+              <div className="sticky top-0 z-[60] h-[100dvh] w-full overflow-hidden bg-[#050505]" data-section-name="Connect" data-theme="dark">
+                <Footer />
+              </div>
+            </main>
+          ) : (
+            <div className="pt-20">
+              {currentView === 'inspiration' ? (
+                <Suspense fallback={<PageLoader />}><Inspiration /></Suspense>
+              ) : currentView === 'about' ? (
+                <Suspense fallback={<PageLoader />}><AboutPage /></Suspense>
+              ) : currentView === 'cart' ? (
+                <Suspense fallback={<PageLoader />}><CartPage /></Suspense>
+              ) : currentView === 'product' && currentProduct ? (
+                <Suspense fallback={<PageLoader />}>
+                  <ProductDetailPage
+                    product={currentProduct}
+                    onBack={() => navigateTo('home')}
+                    onNavigate={navigateTo}
+                  />
+                </Suspense>
+              ) : (
+                <Suspense fallback={<PageLoader />}><FullCollection onNavigateProduct={navigateToProduct} /></Suspense>
+              )}
+            </div>
+          )}
+        </div>
+      </SmoothScroll>
+    </CartProvider>
   );
 }

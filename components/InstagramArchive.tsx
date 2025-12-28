@@ -23,25 +23,25 @@ const FALLBACK_POSTS: InstagramMedia[] = [
     {
         id: 'fallback-1',
         media_type: 'IMAGE',
-        media_url: '/collector-dior-eloise.jpeg',
+        media_url: '/zizi-webp/collector-dior-eloise.webp',
         permalink: 'https://www.instagram.com/zizi__designs/'
     },
     {
         id: 'fallback-2',
         media_type: 'IMAGE',
-        media_url: '/collector-fendi-vittoria.jpeg',
+        media_url: '/zizi-webp/collector-fendi-vittoria.webp',
         permalink: 'https://www.instagram.com/zizi__designs/'
     },
     {
         id: 'fallback-3',
         media_type: 'IMAGE',
-        media_url: '/collector-lv-aurele.jpeg',
+        media_url: '/zizi-webp/collector-lv-aurele.webp',
         permalink: 'https://www.instagram.com/zizi__designs/'
     },
     {
         id: 'fallback-4',
         media_type: 'IMAGE',
-        media_url: '/dior-eloise-hero.jpeg',
+        media_url: '/zizi-webp/dior-eloise-hero.webp',
         permalink: 'https://www.instagram.com/zizi__designs/'
     }
 ];
